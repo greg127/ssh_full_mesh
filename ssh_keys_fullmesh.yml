@@ -1,0 +1,33 @@
+---
+ - name: Setup SSH_KEYS fullmesh
+   hosts: all
+   gather_facts: no
+
+   tasks:
+
+    - name: Get user's home directory
+      user:
+        name: "{{ ssh_key_user | default('root') }}"
+        state: present
+      register: user_info
+
+    - name: Check user's SSH keys
+      user:
+        name: "{{ item }}"
+        home: "{{ user_info.home }}"
+        generate_ssh_key: yes
+        ssh_key_type: rsa
+        ssh_key_bits: 2048
+        ssh_key_comment: "{{ inventory_hostname }}"
+        force: no
+      register: user_data
+      loop:
+        - "{{ ssh_key_user | default('root') }}"
+
+    - name: Build fullmesh SSH keys 
+      authorized_key:
+        user: "{{ ssh_key_user | default('root') }}"
+        path: "{{ user_info.home }}/.ssh/authorized_keys"
+        key: "{{ hostvars[ item ].user_data.results[0].ssh_public_key }}"
+      loop: "{{ hostvars[inventory_hostname].groups.targets }}"
+      when: item != inventory_hostname
