@@ -24,6 +24,14 @@
       loop:
         - "{{ ssh_key_user | default('root') }}"
 
+    - name: Remove old SSH fingerprints
+      known_hosts:
+        path: "{{ user_info.home }}/.ssh/known_hosts"
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ hostvars[inventory_hostname].groups.targets }}"
+      when: item != inventory_hostname
+
     - name: Build fullmesh SSH keys 
       authorized_key:
         user: "{{ ssh_key_user | default('root') }}"
