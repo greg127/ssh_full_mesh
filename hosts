@@ -8,4 +8,4 @@
 # if user don't esists - will be created
 # if hashed-out will be generated for 'root' user
 # ssh_key_user => default for 'root'
-ssh_key_user=greg
+#ssh_key_user=greg
